@@ -1,0 +1,4 @@
+%{"elixir_make": {:hex, :elixir_make, "0.3.0", "285147fa943806eee82f6680b7b446b5569bcf3ee8328fa0a7c200ffc44fbaba", [:mix], []},
+  "nerves_uart": {:hex, :nerves_uart, "0.1.0", "e5358d467c3022e568bd5a41adc9aa5f231d1ae825c9883dd87322e6f38398ea", [:mix, :make], [{:elixir_make, "~> 0.3", [hex: :elixir_make, optional: false]}]},
+  "serial": {:git, "https://github.com/bitgamma/elixir_serial.git", "0ea4220a2a44451f33b20cb2a71adb4265b29d61", [tag: "v0.1.2"]},
+  "sweet_xml": {:hex, :sweet_xml, "0.6.1", "a56f235171f35a32807ce44798dedc748ce249fca574674fecd29c1321cab0de", [:mix], []}}
