@@ -433,7 +433,7 @@ defmodule Raven.Message.CurrentSummationDelivered do
             multiplier: ~x"./Multiplier/text()"s |> transform_by(&Util.hex_to_integer/1),
             divisor: ~x"./Divisor/text()"s |> transform_by(&Util.hex_to_integer/1)
         ))
-        %Message.InstantaneousDemand{message |
+        %Message.CurrentSummationDelivered{message |
             :kw_delivered => (message.summation_delivered*message.multiplier)/message.divisor,
             :kw_received => (message.summation_received*message.multiplier)/message.divisor,
         }
