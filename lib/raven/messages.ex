@@ -38,7 +38,7 @@ defmodule Raven.Message.ConnectionStatus do
             ext_pan_id: ~x"./ExtPanId/text()"so,
             channel: ~x"./Channel/text()"so,
             short_addr: ~x"./ShortAddr/text()"so,
-            link_strength: ~x"./LinkStrength/text()"s
+            link_strength: ~x"./LinkStrength/text()"s |> transform_by(&Util.hex_to_integer/1)
         ))
     end
 
@@ -254,7 +254,7 @@ defmodule Raven.Message.NetworkInfo do
             ext_pan_id: ~x"./ExtPanId/text()"s,
             channel: ~x"./Channel/text()"s,
             short_addr: ~x"./ShortAddr/text()"s,
-            link_strength: ~x"./LinkStrength/text()"s
+            link_strength: ~x"./LinkStrength/text()"s |> transform_by(&Util.hex_to_integer/1)
         ))
     end
 
@@ -419,6 +419,8 @@ defmodule Raven.Message.CurrentSummationDelivered do
         summation_received: 0,
         multiplier: 1,
         divisor: 1000
+        kw_delivered: 0,
+        kw_received: 0
 
     def parse(payload) do
         message = Map.merge(%Message.CurrentSummationDelivered{}, payload |> xpath(
@@ -431,6 +433,10 @@ defmodule Raven.Message.CurrentSummationDelivered do
             multiplier: ~x"./Multiplier/text()"s |> transform_by(&Util.hex_to_integer/1),
             divisor: ~x"./Divisor/text()"s |> transform_by(&Util.hex_to_integer/1)
         ))
+        %Message.InstantaneousDemand{message |
+            :kw_delivered => (message.summation_delivered*message.multiplier)/message.divisor,
+            :kw_received => (message.summation_received*message.multiplier)/message.divisor,
+        }
     end
 
     def command() do
