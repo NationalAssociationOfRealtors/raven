@@ -150,10 +150,7 @@ defmodule Raven.Message.MeterList do
         Map.merge(%Message.MeterList{}, payload |> xpath(
             ~x"//MeterList",
             device_mac_id: ~x"./DeviceMacId/text()"s,
-            meters: [
-                ~x"./MeterMacId"l,
-                meter_mac_id:  ~x"./MeterMacId/text()"s,
-            ]
+            meters: ~x"./MeterMacId/text()"l,
         ))
     end
 

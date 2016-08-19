@@ -30,10 +30,6 @@ defmodule Raven.Client do
         GenServer.call(__MODULE__, {:handler, handler})
     end
 
-    def status() do
-        GenServer.cast(__MODULE__, :status)
-    end
-
     def meters() do
         GenServer.cast(__MODULE__, :meters)
     end
@@ -100,11 +96,6 @@ defmodule Raven.Client do
         Serial.open(Raven.Serial, tty, speed: speed, active: true)
         Logger.info "Running"
         {:ok, %{:message => "", :events => events, :handlers => []}}
-    end
-
-    def handle_cast(:status, state) do
-        Serial.write(Raven.Serial, Message.ConnectionStatus.command)
-        {:noreply, state}
     end
 
     def handle_cast(:meters, state) do
