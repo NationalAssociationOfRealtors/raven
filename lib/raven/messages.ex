@@ -418,7 +418,7 @@ defmodule Raven.Message.CurrentSummationDelivered do
         summation_delivered: 0,
         summation_received: 0,
         multiplier: 1,
-        divisor: 1000
+        divisor: 1000,
         kw_delivered: 0,
         kw_received: 0
 
