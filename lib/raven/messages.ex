@@ -28,7 +28,7 @@ defmodule Raven.Message.ConnectionStatus do
         link_strength: nil
 
     def parse(payload) do
-        Map.merge(%Message.ConnectionStatus{}, payload |> xpath(
+        struct(Message.ConnectionStatus, payload |> xpath(
             ~x"//ConnectionStatus",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -64,7 +64,7 @@ defmodule Raven.Message.DeviceInfo do
         date_code: nil
 
     def parse(payload) do
-        Map.merge(%Message.DeviceInfo{}, payload |> xpath(
+        struct(Message.DeviceInfo, payload |> xpath(
             ~x"//DeviceInfo",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             install_code: ~x"./InstallCode/text()"s,
@@ -103,7 +103,7 @@ defmodule Raven.Message.ScheduleInfo do
         enabled: nil
 
     def parse(payload) do
-        Map.merge(%Message.ScheduleInfo{}, payload |> xpath(
+        struct(Message.ScheduleInfo, payload |> xpath(
             ~x"//ScheduleInfo",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"so,
@@ -147,7 +147,7 @@ defmodule Raven.Message.MeterList do
         meters: []
 
     def parse(payload) do
-        Map.merge(%Message.MeterList{}, payload |> xpath(
+        struct(Message.MeterList, payload |> xpath(
             ~x"//MeterList",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meters: ~x"./MeterMacId/text()"l,
@@ -181,7 +181,7 @@ defmodule Raven.Message.MeterInfo do
         enabled: nil
 
     def parse(payload) do
-        Map.merge(%Message.MeterInfo{}, payload |> xpath(
+        struct(Message.MeterInfo, payload |> xpath(
             ~x"//MeterInfo",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -241,7 +241,7 @@ defmodule Raven.Message.NetworkInfo do
         link_strength: nil
 
     def parse(payload) do
-        Map.merge(%Message.NetworkInfo{}, payload |> xpath(
+        struct(Message.NetworkInfo, payload |> xpath(
             ~x"//NetworkInfo",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             coord_mac_id: ~x"./CoordMacId/text()"s,
@@ -272,7 +272,7 @@ defmodule Raven.Message.TimeCluster do
         local_time: 0
 
     def parse(payload) do
-        message = Map.merge(%Message.TimeCluster{}, payload |> xpath(
+        struct(Message.TimeCluster, payload |> xpath(
             ~x"//TimeCluster",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -302,7 +302,7 @@ defmodule Raven.Message.MessageCluster do
         queue: nil
 
     def parse(payload) do
-        message = Map.merge(%Message.MessageCluster{}, payload |> xpath(
+        struct(Message.MessageCluster, payload |> xpath(
             ~x"//MessageCluster",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -346,7 +346,7 @@ defmodule Raven.Message.PriceCluster do
         trailing_digits: 2
 
     def parse(payload) do
-        message = Map.merge(%Message.PriceCluster{}, payload |> xpath(
+        message = struct(Message.PriceCluster, payload |> xpath(
             ~x"//PriceCluster",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -384,7 +384,7 @@ defmodule Raven.Message.InstantaneousDemand do
         kw: 0
 
     def parse(payload) do
-        message = Map.merge(%Message.InstantaneousDemand{}, payload |> xpath(
+        message = struct(Message.InstantaneousDemand, payload |> xpath(
             ~x"//InstantaneousDemand",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
@@ -420,7 +420,7 @@ defmodule Raven.Message.CurrentSummationDelivered do
         kw_received: 0
 
     def parse(payload) do
-        message = Map.merge(%Message.CurrentSummationDelivered{}, payload |> xpath(
+        message = struct(Message.CurrentSummationDelivered, payload |> xpath(
             ~x"//CurrentSummationDelivered",
             device_mac_id: ~x"./DeviceMacId/text()"s,
             meter_mac_id: ~x"./MeterMacId/text()"s,
