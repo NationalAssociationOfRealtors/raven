@@ -1,7 +1,6 @@
 defmodule Raven.Client do
     use GenServer
     require Logger
-    alias Raven.Event
     alias Raven.Message
     alias Nerves.UART, as: Serial
     alias Raven.Client.MessageSupervisor
