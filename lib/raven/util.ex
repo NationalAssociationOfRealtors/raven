@@ -5,4 +5,8 @@ defmodule Raven.Util do
         Integer.parse(rest, 16) |> elem(0)
     end
 
+    def integer_to_hex(integer) do
+        "0x" <> Base.encode16(integer)
+    end
+
 end

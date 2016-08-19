@@ -7,8 +7,17 @@ defmodule Raven.Client do
     alias Raven.Client.MessageSupervisor
 
     @message_signatures %{
+        "</ConnectionStatus>": Message.ConnectionStatus,
+        "</DeviceInfo>": Message.DeviceInfo,
+        "</ScheduleInfo>": Message.ScheduleInfo,
+        "</MeterList>": Message.MeterList,
+        "</MeterInfo>": Message.MeterInfo,
+        "</NetworkInfo>": Message.NetworkInfo,
+        "</TimeCluster>": Message.TimeCluster,
+        "</MessageCluster>": Message.MessageCluster,
+        "</PriceCluster>": Message.PriceCluster,
         "</InstantaneousDemand>": Message.InstantaneousDemand,
-        "</PriceCluster>": Message.PriceCluster
+        "</CurrentSummationDelivered>": Message.CurrentSummationDelivered
     }
 
     @message_keys Enum.map(Map.keys(@message_signatures), fn(k) -> Atom.to_string(k) end)
