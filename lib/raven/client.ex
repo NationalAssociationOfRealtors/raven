@@ -210,6 +210,7 @@ defmodule Raven.Client do
 
     def handle_message(message, state) do
         Logger.debug("Received Message: #{inspect message}")
+        state
     end
 
 end
