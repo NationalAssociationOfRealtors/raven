@@ -27,6 +27,7 @@ defmodule Raven.Meter do
     end
 
     def init(id) do
+        Logger.debug("Started Meter: #{inspect id}")
         {:ok, %State{id: id}}
     end
 
