@@ -211,7 +211,7 @@ defmodule Raven.Client do
     def handle_message(message, state) do
         case Map.get(message, :meter_mac_id) do
             nil -> nil
-            _ -> GenServer.cast(String.to_atom(message.mac_meter_id), {:message, message})
+            _ -> GenServer.cast(String.to_atom(message.meter_mac_id), {:message, message})
         end
         state
     end
