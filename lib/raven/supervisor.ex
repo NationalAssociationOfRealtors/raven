@@ -8,7 +8,8 @@ defmodule Raven.Supervisor do
     def init(:ok) do
         children = [
             worker(Raven.Client, []),
-            supervisor(Task.Supervisor, [[name: Raven.Client.MessageSupervisor]]),
+            worker(Raven.Parser, []),
+            supervisor(Raven.MeterSupervisor, []),
         ]
         supervise(children, strategy: :one_for_one)
     end

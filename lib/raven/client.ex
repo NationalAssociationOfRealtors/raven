@@ -5,21 +5,16 @@ defmodule Raven.Client do
     alias Nerves.UART, as: Serial
     alias Raven.Client.MessageSupervisor
 
-    @message_signatures %{
-        "</ConnectionStatus>": Message.ConnectionStatus,
-        "</DeviceInfo>": Message.DeviceInfo,
-        "</ScheduleInfo>": Message.ScheduleInfo,
-        "</MeterList>": Message.MeterList,
-        "</MeterInfo>": Message.MeterInfo,
-        "</NetworkInfo>": Message.NetworkInfo,
-        "</TimeCluster>": Message.TimeCluster,
-        "</MessageCluster>": Message.MessageCluster,
-        "</PriceCluster>": Message.PriceCluster,
-        "</InstantaneousDemand>": Message.InstantaneousDemand,
-        "</CurrentSummationDelivered>": Message.CurrentSummationDelivered
-    }
+    @message_signatures Application.get_env(:raven, :message_signatures)
+    @message_keys Application.get_env(:raven, :message_keys)
 
-    @message_keys Enum.map(Map.keys(@message_signatures), fn(k) -> Atom.to_string(k) end)
+    defmodule State do
+        defstruct meters: [],
+            network_info: %Message.NetworkInfo{},
+            message: "",
+            events: nil,
+            handlers: []
+    end
 
     def start_link() do
         GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -41,36 +36,36 @@ defmodule Raven.Client do
         GenServer.cast(__MODULE__, :device_info)
     end
 
-    def schedule_info() do
-        GenServer.cast(__MODULE__, :schedule_info)
-    end
-
-    def meter_info() do
-        GenServer.cast(__MODULE__, :meter_info)
-    end
-
     def network_info() do
         GenServer.cast(__MODULE__, :network_info)
     end
 
-    def get_time() do
-        GenServer.cast(__MODULE__, :get_time)
+    def schedule_info(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:schedule_info, meter_mac_id})
     end
 
-    def get_message() do
-        GenServer.cast(__MODULE__, :get_message)
+    def meter_info(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:meter_info, meter_mac_id})
     end
 
-    def get_price() do
-        GenServer.cast(__MODULE__, :get_price)
+    def get_time(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:get_time, meter_mac_id})
     end
 
-    def get_demand() do
-        GenServer.cast(__MODULE__, :get_demand)
+    def get_message(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:get_message, meter_mac_id})
     end
 
-    def get_summation() do
-        GenServer.cast(__MODULE__, :get_summation)
+    def get_price(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:get_price, meter_mac_id})
+    end
+
+    def get_demand(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:get_demand, meter_mac_id})
+    end
+
+    def get_summation(meter_mac_id) do
+        GenServer.cast(__MODULE__, {:get_summation, meter_mac_id})
     end
 
     def initialize() do
@@ -94,7 +89,8 @@ defmodule Raven.Client do
         Serial.configure(Raven.Serial, framing: {Serial.Framing.Line, separator: "\r\n"})
         Serial.open(Raven.Serial, tty, speed: speed, active: true)
         Logger.info "Running"
-        {:ok, %{:message => "", :events => events, :handlers => []}}
+        Process.send_after(self(), :get_meters, 100)
+        {:ok, %State{:events => events}}
     end
 
     def handle_cast(:meters, state) do
@@ -172,6 +168,11 @@ defmodule Raven.Client do
         {:reply, :ok, %{state | :handlers => [{handler, pid} | state.handlers]}}
     end
 
+    def handle_info(:get_meters, state) do
+        meters()
+        {:noreply, state}
+    end
+
     def handle_info({:gen_event_EXIT, handler, reason}, state) do
         Enum.each(state.handlers, fn(h) ->
             GenEvent.add_mon_handler(state.events, elem(h, 0), elem(h, 1))
@@ -184,31 +185,28 @@ defmodule Raven.Client do
     end
 
     def handle_info({:nerves_uart, _serial, data}, state) do
-        new_state = %{state | :message => state.message <> data}
-        new_state =
-            case String.ends_with?(String.trim(new_state.message), @message_keys) do
+        message = state.message <> data
+        {:noreply,
+            case String.ends_with?(String.trim(message), @message_keys) do
                 true ->
-                    handle_message(new_state.message)
-                    %{new_state | :message => ""}
-                _ -> new_state
+                    %State{
+                        Raven.Parser.parse(Raven.Parser, message)
+                        |> IO.inspect
+                        |> handle_message(state) | :message => ""
+                    }
+                _ -> %State{state | :message => message}
             end
-        {:noreply, new_state}
+        }
     end
 
-    def handle_message(message) do
-        Enum.each(@message_keys, fn(key) ->
-            case String.ends_with?(message, key) do
-                true ->
-                    Logger.info("Processing Message #{message}")
-                    Task.Supervisor.start_child(MessageSupervisor, fn ->
-                        m = @message_signatures[String.to_existing_atom(key)].parse(message)
-                        Logger.debug("Message: #{inspect m}")
-                        GenEvent.notify(Raven.Events, m)
-                    end)
-                _ -> nil
-
+    def handle_message(%Message.MeterList{} = message, state) do
+        Enum.each(message.meters, fn(meter) ->
+            case Process.whereis(String.to_atom(meter)) do
+                nil -> Raven.MeterSupervisor.start_meter(meter)
+                _ -> true
             end
         end)
+        %State{state | :meters => Enum.uniq(message.meters ++ state.meters)}
     end
 
 end

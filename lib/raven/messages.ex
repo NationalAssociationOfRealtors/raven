@@ -113,14 +113,20 @@ defmodule Raven.Message.ScheduleInfo do
         ))
     end
 
-    def command() do
-        "<Command><Name>get_schedule</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_schedule</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
-    def set_schedule(event, frequency, enabled \\ "Y") do
+    def set_schedule(meter_mac_id, event, frequency, enabled \\ "Y") do
         """
         <Command>
             <Name>set_schedule</Name>
+            <MeterMacId>#{meter_mac_id}<MeterMacId>
             <Event>#{event}</Event>
             <Frequency>#{Util.integer_to_hex(frequency)}</Frequency>
             <Enabled>#{enabled}</Frequency>
@@ -128,10 +134,11 @@ defmodule Raven.Message.ScheduleInfo do
         """
     end
 
-    def set_schedule_default(event) do
+    def set_schedule_default(meter_mac_id, event) do
         """
         <Command>
             <Name>set_schedule_default</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
             <Event>#{event}</Event>
         </Command>
         """
@@ -194,14 +201,20 @@ defmodule Raven.Message.MeterInfo do
         ))
     end
 
-    def command() do
-        "<Command><Name>get_meter_info</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_meter_info</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
-    def set_meter_info(nick_name, account, auth, host, enabled) do
+    def set_meter_info(meter_mac_id, nick_name, account, auth, host, enabled) do
         """
         <Command>
             <Name>set_meter_info</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
             <NickName>#{nick_name}</NickName>
             <Account>#{account}</Account>
             <Auth>#{auth}</Auth>
@@ -281,8 +294,13 @@ defmodule Raven.Message.TimeCluster do
         ))
     end
 
-    def command() do
-        "<Command><Name>get_time</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_time</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
 end
@@ -315,8 +333,13 @@ defmodule Raven.Message.MessageCluster do
         ))
     end
 
-    def command() do
-        "<Command><Name>get_message</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_message</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
     def confirm(id) do
@@ -364,8 +387,13 @@ defmodule Raven.Message.PriceCluster do
         }
     end
 
-    def command() do
-        "<Command><Name>get_current_price</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_current_price</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
 end
@@ -398,8 +426,13 @@ defmodule Raven.Message.InstantaneousDemand do
         }
     end
 
-    def command() do
-        "<Command><Name>get_instantaneous_demand</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_instantaneous_demand</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
 end
@@ -436,8 +469,13 @@ defmodule Raven.Message.CurrentSummationDelivered do
         }
     end
 
-    def command() do
-        "<Command><Name>get_current_summation_delivered</Name></Command>"
+    def command(meter_mac_id) do
+        """
+        <Command>
+            <Name>get_current_summation_delivered</Name>
+            <MeterMacId>#{meter_mac_id}</MeterMacId>
+        </Command>
+        """
     end
 
 end
