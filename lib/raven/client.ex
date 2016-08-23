@@ -191,7 +191,6 @@ defmodule Raven.Client do
                 true ->
                     %State{
                         Raven.Parser.parse(Raven.Parser, message)
-                        |> IO.inspect
                         |> handle_message(state) | :message => ""
                     }
                 _ -> %State{state | :message => message}
@@ -207,6 +206,10 @@ defmodule Raven.Client do
             end
         end)
         %State{state | :meters => Enum.uniq(message.meters ++ state.meters)}
+    end
+
+    def handle_message(message, state) do
+        Logger.debug("Received Message: #{inspect message}")
     end
 
 end
