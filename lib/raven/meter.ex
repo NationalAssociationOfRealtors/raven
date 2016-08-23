@@ -2,7 +2,6 @@ defmodule Raven.Meter do
     use GenServer
     require Logger
     alias Raven.Message
-    alias Nerves.UART, as: Serial
 
     defmodule State do
         defstruct id: nil,
@@ -29,6 +28,40 @@ defmodule Raven.Meter do
     def init(id) do
         Logger.debug("Started Meter: #{inspect id}")
         {:ok, %State{id: id}}
+    end
+
+    def handle_cast({:message, %Message.MeterInfo{} = message}, state) do
+        {:noreply, %State{state | :meter_info => message}}
+    end
+
+    def handle_cast({:message, %Message.ConnectionStatus{} = message}, state) do
+        {:noreply, %State{state | :connection_status => message}}
+    end
+
+    def handle_cast({:message, %Message.TimeCluster{} = message}, state) do
+        {:noreply, %State{state | :time => message}}
+    end
+
+    def handle_cast({:message, %Message.MessageCluster{} = message}, state) do
+        {:noreply, %State{state | :message => message}}
+    end
+
+    def handle_cast({:message, %Message.PriceCluster{} = message}, state) do
+        {:noreply, %State{state | :price => message}}
+    end
+
+    def handle_cast({:message, %Message.InstantaneousDemand{} = message}, state) do
+        {:noreply, %State{state | :demand => message}}
+    end
+
+    def handle_cast({:message, %Message.CurrentSummationDelivered{} = message}, state) do
+        {:noreply, %State{state | :summation => message}}
+    end
+
+    def handle_cast({:message, %Message.ScheduleInfo{} = message}, state) do
+        {:noreply, %State{state | :schedules => %{state.schedules |
+            String.to_existing_atom(Map.get(message, :event)) => message
+        }}}
     end
 
     def handle_cast({:message, message}, state) do
