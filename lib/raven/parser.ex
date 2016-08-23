@@ -17,14 +17,10 @@ defmodule Raven.Parser do
         {:reply, Enum.reduce(@message_keys, %{}, fn(key, message) ->
             case String.ends_with?(payload, key) do
                 true ->
-                    try do
-                        Map.merge(
-                            message,
-                            @message_signatures[String.to_existing_atom(key)].parse(payload)
-                        )
-                    catch
-                        :exit, _ -> message
-                    end
+                    Map.merge(
+                        message,
+                        @message_signatures[String.to_existing_atom(key)].parse(payload)
+                    )
                 _ -> message
             end
         end), state}
