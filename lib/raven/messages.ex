@@ -157,7 +157,7 @@ defmodule Raven.Message.MeterList do
         struct(Message.MeterList, payload |> xpath(
             ~x"//MeterList",
             device_mac_id: ~x"./DeviceMacId/text()"s,
-            meters: ~x"./MeterMacId/text()"l,
+            meters: ~x"./MeterMacId/text()"ls,
         ))
     end
 
