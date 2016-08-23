@@ -33,6 +33,7 @@ defmodule Raven.Meter do
 
     def handle_cast({:message, message}, state) do
         Logger.info("Meter #{inspect state.id} Message: #{inspect message}")
+        {:noreply, state}
     end
 
 end
