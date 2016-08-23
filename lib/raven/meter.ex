@@ -31,4 +31,8 @@ defmodule Raven.Meter do
         {:ok, %State{id: id}}
     end
 
+    def handle_cast({:message, message}, state) do
+        Logger.info("Meter #{inspect state.id} Message: #{message}")
+    end
+
 end
