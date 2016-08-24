@@ -20,12 +20,12 @@ Network debugging messages will appear in `stdout` once every 10 seconds if you 
 
     %Raven.Message.NetworkInfo{
         channel: "19",
-        coord_mac_id: "0x00135005000254e7",
+        coord_mac_id: "0x0000000000000000",
         description: "Successfully Joined",
-        device_mac_id: "0x00158d00001ab7ed",
-        ext_pan_id: "0x00135005000254e7",
+        device_mac_id: "0x0000000000000000",
+        ext_pan_id: "0x000000000000000",
         link_strength: 100,
-        short_addr: "0x04e3",
+        short_addr: "0x0000",
         status: "Connected",
         status_code: ""
     }
@@ -33,11 +33,11 @@ Network debugging messages will appear in `stdout` once every 10 seconds if you 
 Once connected you will start to see meter messages every few seconds. By default, most meters will send certain messages periodically. You can view the schedule in the meter process state. Something like this.
 
     %Raven.Message.ScheduleInfo{
-        device_mac_id: "0x00158d00001ab7ed",
+        device_mac_id: "0x00000000000",
         enabled: "Y",
         event: "time",
         frequency: 900,
-        meter_mac_id: "0x00135005000254e7"
+        meter_mac_id: "0x000000000000"
     }
 
 The different event schedule types are `time`, `price`, `summation`, `message`, `scheduled_prices`, `profile_data`, `demand`
@@ -46,10 +46,10 @@ Generally the most interesting is the `InstantaneousDemand` message
 
     %Raven.Message.InstantaneousDemand{
         demand: 612,
-        device_mac_id: "0x00158d00001ab7ed",
+        device_mac_id: "0x00000000000000",
         divisor: 1000,
         kw: 0.612,
-        meter_mac_id: "0x00135005000254e7",
+        meter_mac_id: "0x00000000000",
         multiplier: 1,
         time_stamp: 525378324
     }
