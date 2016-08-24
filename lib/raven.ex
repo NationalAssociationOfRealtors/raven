@@ -3,6 +3,6 @@ defmodule Raven do
     require Logger
 
     def start(_type, _args) do
-        Raven.Supervisor.start_link
+        {:ok, pid} = Raven.Supervisor.start_link
     end
 end

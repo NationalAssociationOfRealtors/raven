@@ -11,17 +11,13 @@ defmodule Raven.Client do
     defmodule State do
         defstruct meters: [],
             network_info: %Message.NetworkInfo{},
+            device_info: %Message.DeviceInfo{},
             message: "",
-            events: nil,
-            handlers: []
+            events: nil
     end
 
     def start_link() do
         GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
-    end
-
-    def add_handler(handler) do
-        GenServer.call(__MODULE__, {:handler, handler})
     end
 
     def meters() do
@@ -84,13 +80,12 @@ defmodule Raven.Client do
         tty = Application.get_env(:raven, :tty)
         speed = Application.get_env(:raven, :speed)
         {:ok, serial} = Serial.start_link([{:name, Raven.Serial}])
-        {:ok, events} = GenEvent.start_link([{:name, Raven.Events}])
         Logger.debug "Starting Serial: #{tty}"
         Serial.configure(Raven.Serial, framing: {Serial.Framing.Line, separator: "\r\n"})
         Serial.open(Raven.Serial, tty, speed: speed, active: true)
         Logger.info "Running"
-        Process.send_after(self(), :get_meters, 100)
-        {:ok, %State{:events => events}}
+        Process.send_after(self(), :update, 1000)
+        {:ok, %State{}}
     end
 
     def handle_cast(:meters, state) do
@@ -108,43 +103,43 @@ defmodule Raven.Client do
         {:noreply, state}
     end
 
-    def handle_cast(:schedule_info, state) do
-        Serial.write(Raven.Serial, Message.ScheduleInfo.command)
-        {:noreply, state}
-    end
-
-    def handle_cast(:meter_info, state) do
-        Serial.write(Raven.Serial, Message.MeterInfo.command)
-        {:noreply, state}
-    end
-
     def handle_cast(:network_info, state) do
         Serial.write(Raven.Serial, Message.NetworkInfo.command)
         {:noreply, state}
     end
 
-    def handle_cast(:get_time, state) do
-        Serial.write(Raven.Serial, Message.TimeCluster.command)
+    def handle_cast({:schedule_info, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.ScheduleInfo.command(meter_mac_id))
         {:noreply, state}
     end
 
-    def handle_cast(:get_message, state) do
-        Serial.write(Raven.Serial, Message.MessageCluster.command)
+    def handle_cast({:meter_info, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.MeterInfo.command(meter_mac_id))
         {:noreply, state}
     end
 
-    def handle_cast(:get_price, state) do
-        Serial.write(Raven.Serial, Message.PriceCluster.command)
+    def handle_cast({:get_time, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.TimeCluster.command(meter_mac_id))
         {:noreply, state}
     end
 
-    def handle_cast(:get_demand, state) do
-        Serial.write(Raven.Serial, Message.InstantaneousDemand.command)
+    def handle_cast({:get_message, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.MessageCluster.command(meter_mac_id))
         {:noreply, state}
     end
 
-    def handle_cast(:get_summation, state) do
-        Serial.write(Raven.Serial, Message.CurrentSummationDelivered.command)
+    def handle_cast({:get_price, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.PriceCluster.command(meter_mac_id))
+        {:noreply, state}
+    end
+
+    def handle_cast({:get_demand, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.InstantaneousDemand.command(meter_mac_id))
+        {:noreply, state}
+    end
+
+    def handle_cast({:get_summation, meter_mac_id}, state) do
+        Serial.write(Raven.Serial, Message.CurrentSummationDelivered.command(meter_mac_id))
         {:noreply, state}
     end
 
@@ -163,20 +158,11 @@ defmodule Raven.Client do
         {:noreply, state}
     end
 
-    def handle_call({:handler, handler}, {pid, _} = from, state) do
-        GenEvent.add_mon_handler(state.events, handler, pid)
-        {:reply, :ok, %{state | :handlers => [{handler, pid} | state.handlers]}}
-    end
-
-    def handle_info(:get_meters, state) do
+    def handle_info(:update, state) do
         meters()
-        {:noreply, state}
-    end
-
-    def handle_info({:gen_event_EXIT, handler, reason}, state) do
-        Enum.each(state.handlers, fn(h) ->
-            GenEvent.add_mon_handler(state.events, elem(h, 0), elem(h, 1))
-        end)
+        device_info()
+        network_info()
+        Process.send_after(self(), :update, 10000)
         {:noreply, state}
     end
 
@@ -190,7 +176,7 @@ defmodule Raven.Client do
             case String.ends_with?(String.trim(message), @message_keys) do
                 true ->
                     %State{
-                        Raven.Parser.parse(Raven.Parser, message)
+                        parse_payload(message)
                         |> handle_message(state) | :message => ""
                     }
                 _ -> %State{state | :message => message}
@@ -205,7 +191,21 @@ defmodule Raven.Client do
                 _ -> true
             end
         end)
-        %State{state | :meters => Enum.uniq(message.meters ++ state.meters)}
+        state = %State{state | :meters => Enum.uniq(message.meters ++ state.meters)}
+        GenEvent.notify(Raven.Events, state)
+        state
+    end
+
+    def handle_message(%Message.DeviceInfo{} = message, state) do
+        state = %State{state | :device_info => message}
+        GenEvent.notify(Raven.Events, state)
+        state
+    end
+
+    def handle_message(%Message.NetworkInfo{} = message, state) do
+        state = %State{state | :network_info => message}
+        GenEvent.notify(Raven.Events, state)
+        state
     end
 
     def handle_message(message, state) do
@@ -214,6 +214,19 @@ defmodule Raven.Client do
             _ -> GenServer.cast(String.to_atom(message.meter_mac_id), {:message, message})
         end
         state
+    end
+
+    def parse_payload(payload) do
+        Enum.reduce(@message_keys, %{}, fn(key, message) ->
+            case String.ends_with?(payload, key) do
+                true ->
+                    Map.merge(
+                        message,
+                        @message_signatures[String.to_existing_atom(key)].parse(payload)
+                    )
+                _ -> message
+            end
+        end)
     end
 
 end
