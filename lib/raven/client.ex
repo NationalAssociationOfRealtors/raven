@@ -177,7 +177,6 @@ defmodule Raven.Client do
                 true <- String.contains?(message, "</#{ts}>") do
                 {:halt, %State{
                     @message_signatures[tag].parse(message)
-                    |> IO.inspect
                     |> handle_message(state) | :message => ""
                 }}
             else
