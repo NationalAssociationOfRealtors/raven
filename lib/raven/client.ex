@@ -177,6 +177,7 @@ defmodule Raven.Client do
                 true <- String.ends_with?(message, "</#{ts}>") do
                 %State{
                     @message_signatures[tag].parse(message)
+                    |> IO.inspect
                     |> handle_message(state) | :message => ""
                 }
             else
