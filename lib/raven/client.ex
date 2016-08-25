@@ -173,6 +173,7 @@ defmodule Raven.Client do
         message = state.message <> data |> String.trim
         {:noreply, Enum.reduce_while(Map.keys(@message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
+            #stupid junk data from the serial. xmerl does not handle this gracefully.
             with true <- String.contains?(message, "<#{ts}>"),
                 true <- String.contains?(message, "</#{ts}>") do
                 {:halt, %State{
