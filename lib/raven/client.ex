@@ -184,7 +184,7 @@ defmodule Raven.Client do
                 }
             else
                 false ->
-                    case String.starts_with?("0") do
+                    case String.starts_with?(message, "0") do
                         true -> %State{state | :message => ""}
                         false -> %State{state | :message => message}
                     end
