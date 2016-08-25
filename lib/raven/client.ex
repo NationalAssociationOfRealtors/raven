@@ -170,8 +170,6 @@ defmodule Raven.Client do
     end
 
     def handle_info({:nerves_uart, _serial, data}, state) do
-        IO.inspect(data)
-        Logger.debug("#{inspect String.starts_with?(data, "^@")}")
         message = state.message <> data |> String.trim
         {:noreply, Enum.reduce(Map.keys(@message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
@@ -184,7 +182,7 @@ defmodule Raven.Client do
                 }
             else
                 false ->
-                    case String.starts_with?(message, "0") do
+                    case String.ends_with?(message, "</#{tag}>") do
                         true -> %State{state | :message => ""}
                         false -> %State{state | :message => message}
                     end
