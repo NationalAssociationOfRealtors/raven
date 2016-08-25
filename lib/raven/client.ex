@@ -6,7 +6,6 @@ defmodule Raven.Client do
     alias Raven.Client.MessageSupervisor
 
     @message_signatures Application.get_env(:raven, :message_signatures)
-    @message_keys Application.get_env(:raven, :message_keys)
 
     defmodule State do
         defstruct meters: [],
@@ -171,17 +170,19 @@ defmodule Raven.Client do
     end
 
     def handle_info({:nerves_uart, _serial, data}, state) do
-        message = state.message <> data
-        {:noreply,
-            case String.ends_with?(String.trim(message), @message_keys) do
-                true ->
-                    %State{
-                        parse_payload(message)
-                        |> handle_message(state) | :message => ""
-                    }
-                _ -> %State{state | :message => message}
+        message = state.message <> data |> String.trim
+        {:noreply, Enum.reduce(Map.keys(@message_signatures), state, fn(tag, state) ->
+            ts = tag |> Atom.to_string
+            with true <- String.starts_with?(message, "<#{ts}>"),
+                true <- String.ends_with?(message, "</#{ts}>") do
+                %State{
+                    @message_signatures[tag].parse(message)
+                    |> handle_message(state) | :message => ""
+                }
+            else
+                false -> %State{state | :message => message}
             end
-        }
+        end)}
     end
 
     def handle_message(%Message.MeterList{} = message, state) do
@@ -214,19 +215,6 @@ defmodule Raven.Client do
             _ -> GenServer.cast(String.to_atom(message.meter_mac_id), {:message, message})
         end
         state
-    end
-
-    def parse_payload(payload) do
-        Enum.reduce(@message_keys, %{}, fn(key, message) ->
-            case String.ends_with?(payload, key) do
-                true ->
-                    Map.merge(
-                        message,
-                        @message_signatures[String.to_existing_atom(key)].parse(payload)
-                    )
-                _ -> message
-            end
-        end)
     end
 
 end
