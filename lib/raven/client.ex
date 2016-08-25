@@ -182,6 +182,7 @@ defmodule Raven.Client do
                 }
             else
                 false ->
+                    Logger.debug(message)
                     case String.ends_with?(message, "</#{tag}>") do
                         true -> %State{state | :message => ""}
                         false -> %State{state | :message => message}
