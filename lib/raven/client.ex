@@ -173,21 +173,15 @@ defmodule Raven.Client do
         message = state.message <> data |> String.trim
         {:noreply, Enum.reduce(Map.keys(@message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
-            with true <- String.starts_with?(message, "<#{ts}>"),
-                true <- String.ends_with?(message, "</#{ts}>") do
+            with true <- String.contains?(message, "<#{ts}>"),
+                true <- String.contains?(message, "</#{ts}>") do
                 %State{
                     @message_signatures[tag].parse(message)
                     |> IO.inspect
                     |> handle_message(state) | :message => ""
                 }
             else
-                false ->
-                    Logger.debug(message)
-                    Logger.debug("</#{ts}>")
-                    case String.ends_with?(message, "</#{ts}>") do
-                        true -> %State{state | :message => ""}
-                        false -> %State{state | :message => message}
-                    end
+                false -> %State{state | :message => message}
             end
         end)}
     end
