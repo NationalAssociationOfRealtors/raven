@@ -171,17 +171,17 @@ defmodule Raven.Client do
 
     def handle_info({:nerves_uart, _serial, data}, state) do
         message = state.message <> data |> String.trim
-        {:noreply, Enum.reduce(Map.keys(@message_signatures), state, fn(tag, state) ->
+        {:noreply, Enum.reduce_while(Map.keys(@message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
             with true <- String.contains?(message, "<#{ts}>"),
                 true <- String.contains?(message, "</#{ts}>") do
-                %State{
+                {:halt, %State{
                     @message_signatures[tag].parse(message)
                     |> IO.inspect
                     |> handle_message(state) | :message => ""
-                }
+                }}
             else
-                false -> %State{state | :message => message}
+                false -> {:cont, %State{state | :message => message}}
             end
         end)}
     end
