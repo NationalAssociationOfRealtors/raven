@@ -170,6 +170,7 @@ defmodule Raven.Client do
     end
 
     def handle_info({:nerves_uart, _serial, data}, state) do
+        Logger.debug(data)
         message = state.message <> data |> String.trim
         {:noreply, Enum.reduce(Map.keys(@message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
