@@ -1,5 +1,6 @@
 defmodule Raven.Mixfile do
   use Mix.Project
+  alias Raven.Message
 
   def project do
     [app: :raven,
@@ -18,7 +19,22 @@ defmodule Raven.Mixfile do
   def application do
     [
       applications: [:logger, :nerves_uart, :sweet_xml, :xmerl],
-      mod: {Raven, []}
+      mod: {Raven, []},
+      env: [speed: 115200,
+        tty: "/dev/ttyUSB0",
+        message_signatures: %{
+          "ConnectionStatus": Message.ConnectionStatus,
+          "DeviceInfo": Message.DeviceInfo,
+          "ScheduleInfo": Message.ScheduleInfo,
+          "MeterList": Message.MeterList,
+          "MeterInfo": Message.MeterInfo,
+          "NetworkInfo": Message.NetworkInfo,
+          "TimeCluster": Message.TimeCluster,
+          "MessageCluster": Message.MessageCluster,
+          "PriceCluster": Message.PriceCluster,
+          "InstantaneousDemand": Message.InstantaneousDemand,
+          "CurrentSummationDelivered": Message.CurrentSummationDelivered
+      }]
     ]
   end
 
