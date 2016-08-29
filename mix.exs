@@ -3,7 +3,7 @@ defmodule Raven.Mixfile do
   alias Raven.Message
 
   def project do
-    [app: :raven,
+    [app: :raven_smcd,
      version: "0.1.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
@@ -40,13 +40,13 @@ defmodule Raven.Mixfile do
 
   def description do
       """
-      A Client for the Rainforest Automation Raven USB Stick
+      A Client for the Rainforest Automation Raven USB SMCD (Smart Meter Connected Device)
       """
   end
 
   def package do
     [
-      name: :raven,
+      name: :raven_smcd,
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Christopher Steven Coté"],
       licenses: ["MIT License"],
