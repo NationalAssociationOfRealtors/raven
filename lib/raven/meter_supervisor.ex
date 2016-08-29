@@ -14,7 +14,7 @@ defmodule Raven.MeterSupervisor do
     end
 
     def start_meter(meter_mac_id) do
-        Logger.info "Starting meter #{meter_mac_id}"
+        Logger.debug "Starting meter #{meter_mac_id}"
         Supervisor.start_child(__MODULE__, [String.to_atom(meter_mac_id)])
     end
 end

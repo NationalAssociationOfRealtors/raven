@@ -7,7 +7,7 @@ defmodule Raven.Handler do
     end
 
     def handle_event(message, parent) do
-        Logger.info("Event Message #{inspect message}")
+        Logger.debug("Event Message #{inspect message}")
         send(parent, message)
         {:ok, parent}
     end

@@ -82,7 +82,7 @@ defmodule Raven.Client do
         Logger.debug "Starting Serial: #{tty}"
         Serial.configure(Raven.Serial, framing: {Serial.Framing.Line, separator: "\r\n"})
         Serial.open(Raven.Serial, tty, speed: speed, active: true)
-        Logger.info "Running"
+        Logger.debug "Running"
         Process.send_after(self(), :update, 1000)
         {:ok, %State{}}
     end
