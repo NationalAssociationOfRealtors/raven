@@ -59,6 +59,7 @@ defmodule Raven.Mixfile do
     [
         {:nerves_uart, "~> 0.1.0"},
         {:sweet_xml, "~> 0.6.1"},
+        {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
 end
