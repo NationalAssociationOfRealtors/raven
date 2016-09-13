@@ -169,6 +169,10 @@ defmodule Raven.Client do
         {:noreply, state}
     end
 
+    def handle_info({:nerves_uart, _serial, {:error, :ebadf}}, state) do
+        {:noreply, state}
+    end
+
     def handle_info({:nerves_uart, _serial, data}, state) do
         message = state.message <> data |> String.trim
         {:noreply, Enum.reduce_while(Map.keys(@message_signatures), state, fn(tag, state) ->
