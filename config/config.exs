@@ -10,22 +10,22 @@ alias Raven.Message
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-config :raven,
-    speed: 115200,
-    tty: "/dev/ttyUSB0",
-    message_signatures: %{
-        "ConnectionStatus": Message.ConnectionStatus,
-        "DeviceInfo": Message.DeviceInfo,
-        "ScheduleInfo": Message.ScheduleInfo,
-        "MeterList": Message.MeterList,
-        "MeterInfo": Message.MeterInfo,
-        "NetworkInfo": Message.NetworkInfo,
-        "TimeCluster": Message.TimeCluster,
-        "MessageCluster": Message.MessageCluster,
-        "PriceCluster": Message.PriceCluster,
-        "InstantaneousDemand": Message.InstantaneousDemand,
-        "CurrentSummationDelivered": Message.CurrentSummationDelivered
-    }
+#config :raven_smcd,
+#    speed: 115200,
+#    tty: "/dev/ttyUSB0",
+#    message_signatures: %{
+#        "ConnectionStatus": Message.ConnectionStatus,
+#        "DeviceInfo": Message.DeviceInfo,
+#        "ScheduleInfo": Message.ScheduleInfo,
+#        "MeterList": Message.MeterList,
+#        "MeterInfo": Message.MeterInfo,
+#        "NetworkInfo": Message.NetworkInfo,
+#        "TimeCluster": Message.TimeCluster,
+#        "MessageCluster": Message.MessageCluster,
+#        "PriceCluster": Message.PriceCluster,
+#        "InstantaneousDemand": Message.InstantaneousDemand,
+#        "CurrentSummationDelivered": Message.CurrentSummationDelivered
+#    }
 
 # You can configure for your application as:
 #

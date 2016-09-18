@@ -5,14 +5,13 @@ defmodule Raven.Client do
     alias Nerves.UART, as: Serial
     alias Raven.Client.MessageSupervisor
 
-    @message_signatures Application.get_env(:raven, :message_signatures)
-
     defmodule State do
         defstruct meters: [],
             network_info: %Message.NetworkInfo{},
             device_info: %Message.DeviceInfo{},
             message: "",
-            events: nil
+            events: nil,
+            message_signatures: %{}
     end
 
     def start_link() do
@@ -76,15 +75,16 @@ defmodule Raven.Client do
     end
 
     def init(:ok) do
-        tty = Application.get_env(:raven, :tty)
-        speed = Application.get_env(:raven, :speed)
+        tty = Application.get_env(:raven_smcd, :tty)
+        speed = Application.get_env(:raven_smcd, :speed)
+        message_signatures = Application.get_env(:raven_smcd, :message_signatures)
         {:ok, serial} = Serial.start_link([{:name, Raven.Serial}])
         Logger.debug "Starting Serial: #{tty}"
         Serial.configure(Raven.Serial, framing: {Serial.Framing.Line, separator: "\r\n"})
         Serial.open(Raven.Serial, tty, speed: speed, active: true)
         Logger.debug "Running"
         Process.send_after(self(), :update, 1000)
-        {:ok, %State{}}
+        {:ok, %State{message_signatures: message_signatures}}
     end
 
     def handle_cast(:meters, state) do
@@ -175,13 +175,13 @@ defmodule Raven.Client do
 
     def handle_info({:nerves_uart, _serial, data}, state) do
         message = state.message <> data |> String.trim
-        {:noreply, Enum.reduce_while(Map.keys(@message_signatures), state, fn(tag, state) ->
+        {:noreply, Enum.reduce_while(Map.keys(state.message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
             #stupid junk data from the serial. xmerl does not handle this gracefully.
             with true <- String.contains?(message, "<#{ts}>"),
                 true <- String.contains?(message, "</#{ts}>") do
                 {:halt, %State{
-                    @message_signatures[tag].parse(message)
+                    state.message_signatures[tag].parse(message)
                     |> handle_message(state) | :message => ""
                 }}
             else
