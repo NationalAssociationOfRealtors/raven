@@ -4,7 +4,7 @@ defmodule Raven.Mixfile do
 
   def project do
     [app: :raven_smcd,
-     version: "0.1.2",
+     version: "0.1.3",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -49,7 +49,7 @@ defmodule Raven.Mixfile do
       name: :raven_smcd,
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Christopher Steven Coté"],
-      licenses: ["MIT License"],
+      licenses: ["Apache License 2.0"],
       links: %{"GitHub" => "https://github.com/NationalAssociationOfRealtors/raven",
           "Docs" => "https://github.com/NationalAssociationOfRealtors/raven"}
     ]
@@ -57,7 +57,7 @@ defmodule Raven.Mixfile do
 
   defp deps do
     [
-        {:nerves_uart, "~> 0.1.0"},
+        {:nerves_uart, "~> 0.1.1"},
         {:sweet_xml, "~> 0.6.1"},
         {:ex_doc, ">= 0.0.0", only: :dev}
     ]
