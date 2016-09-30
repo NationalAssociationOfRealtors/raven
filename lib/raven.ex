@@ -13,7 +13,7 @@ defmodule Raven do
       Logger.info("#{inspect device}")
       case Map.get(device, :product_id, 0) do
         35368 ->
-          Logger.info("Setting Meteo TTY: #{inspect tty}")
+          Logger.info("Setting Raven TTY: #{inspect tty}")
           tty = case String.starts_with?(tty, "/dev") do
             true -> tty
             false -> "/dev/#{tty}"
