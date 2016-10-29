@@ -3,7 +3,13 @@ defmodule Raven do
   require Logger
   alias Nerves.UART, as: Serial
 
+  @nerves System.get_env("NERVES")
+
   def start(_type, _args) do
+    case @nerves do
+      "true" -> System.cmd("modprobe", ["ftdi_sio"])
+      _ -> nil
+    end
     get_tty
     {:ok, pid} = Raven.Supervisor.start_link
   end
