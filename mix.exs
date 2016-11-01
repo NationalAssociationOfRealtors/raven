@@ -4,7 +4,7 @@ defmodule Raven.Mixfile do
 
   def project do
     [app: :raven_smcd,
-     version: "0.1.7",
+     version: "0.1.8",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -21,7 +21,7 @@ defmodule Raven.Mixfile do
       applications: [:logger, :nerves_uart, :sweet_xml, :xmerl],
       mod: {Raven, []},
       env: [speed: 115200,
-        tty: "/dev/ttyUSB0",
+        tty: "/dev/ttyUSB9879879799",
         message_signatures: %{
           "ConnectionStatus": Message.ConnectionStatus,
           "DeviceInfo": Message.DeviceInfo,
