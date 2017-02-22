@@ -15,7 +15,7 @@ defmodule Raven.Client do
     end
 
     def start_link() do
-        GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+        GenServer.start_link(__MODULE__, :ok, name: __MODULE__)#opts)
     end
 
     def meters() do
@@ -178,12 +178,11 @@ defmodule Raven.Client do
         {:noreply, Enum.reduce_while(Map.keys(state.message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
             #stupid junk data from the serial. xmerl does not handle this gracefully.
-            with true <- String.contains?(message, "<#{ts}>"),
-                true <- String.contains?(message, "</#{ts}>") do
-                {:halt, %State{
-                    state.message_signatures[tag].parse(message)
-                    |> handle_message(state) | :message => ""
-                }}
+            with true <- String.starts_with?(message, "<#{ts}>"),
+                true <- String.ends_with?(message, "</#{ts}>") do
+                state = state.message_signatures[tag].parse(message)
+                |> handle_message(state)
+                {:halt, %State{ state | :message => ""}}
             else
                 false -> {:cont, %State{state | :message => message}}
             end

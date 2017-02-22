@@ -8,8 +8,8 @@ defmodule RavenTest do
 
     test "event handler" do
         Raven.EventManager.add_handler(Raven.Handler)
-        assert_receive(%Raven.Meter.State{}, 10000)
-        assert_receive(%Raven.Client.State{}, 10000)
+        assert_receive(%Raven.Meter.State{}, 450000)
+        assert_receive(%Raven.Client.State{}, 450000)
     end
 
 end
