@@ -178,13 +178,20 @@ defmodule Raven.Client do
         {:noreply, Enum.reduce_while(Map.keys(state.message_signatures), state, fn(tag, state) ->
             ts = tag |> Atom.to_string
             #stupid junk data from the serial. xmerl does not handle this gracefully.
-            with true <- String.starts_with?(message, "<#{ts}>"),
-                true <- String.ends_with?(message, "</#{ts}>") do
-                state = state.message_signatures[tag].parse(message)
-                |> handle_message(state)
-                {:halt, %State{ state | :message => ""}}
-            else
-                false -> {:cont, %State{state | :message => message}}
+            case String.contains?(message, "<#{ts}>") &&  String.contains?(message, "</#{ts}>") do
+              true ->
+                Logger.debug "Contains both tags"
+                with true <- String.starts_with?(message, "<#{ts}>"),
+                    true <- String.ends_with?(message, "</#{ts}>") do
+                    state = state.message_signatures[tag].parse(message)
+                    |> handle_message(state)
+                    {:halt, %State{ state | :message => ""}}
+                else
+                    false ->
+                      Logger.debug "Bad Message: #{inspect message}"
+                      {:cont, %State{state | :message => ""}}
+                end
+              false -> {:cont, %State{state | :message => message}}
             end
         end)}
     end
