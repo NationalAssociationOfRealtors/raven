@@ -180,7 +180,6 @@ defmodule Raven.Client do
             #stupid junk data from the serial. xmerl does not handle this gracefully.
             case String.contains?(message, "<#{ts}>") &&  String.contains?(message, "</#{ts}>") do
               true ->
-                Logger.debug "Contains both tags"
                 with true <- String.starts_with?(message, "<#{ts}>"),
                     true <- String.ends_with?(message, "</#{ts}>") do
                     state = state.message_signatures[tag].parse(message)
@@ -189,7 +188,7 @@ defmodule Raven.Client do
                 else
                     false ->
                       Logger.debug "Bad Message: #{inspect message}"
-                      {:cont, %State{state | :message => ""}}
+                      {:halt, %State{state | :message => ""}}
                 end
               false -> {:cont, %State{state | :message => message}}
             end
